@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        h2 {
+            color: #555;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4caf50;
+            color: #fff;
+        }
+
+        button {
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to Admin Panel</h1>
+
+    <h2>Authorized Users:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Password</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="userList"></tbody>
+    </table>
+
+    <script>
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+
+        const userList = document.getElementById('userList');
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${user.username}</td><td>${user.email}</td><td>${user.password}</td><td></td>`;
+            userList.appendChild(row);
+        });
+
+        function addUser() {
+            const username = prompt('Enter username:');
+            const email = prompt('Enter email:');
+            const password = prompt('Enter password:');
+
+            if (username && email && password) {
+                const newUser = { username, email, password };
+                let existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+
+                const userExists = existingUsers.some(user => user.username === username);
+
+                if (!userExists) {
+                    existingUsers.push(newUser);
+                    localStorage.setItem('users', JSON.stringify(existingUsers));
+                    alert('User added successfully!');
+                } else {
+                    alert('Username already exists. User not added.');
+                }
+            } else {
+                alert('Invalid input. User not added.');
+            }
+            location.reload();
+        }
+
+        function updateUser(index) {
+            const userToUpdate = users[index];
+
+            if (userToUpdate) {
+                const newUsername = prompt('Enter new username:');
+                const newPassword = prompt('Enter new password:');
+
+                if (newUsername && newPassword) {
+                    userToUpdate.username = newUsername;
+                    userToUpdate.password = newPassword;
+                    localStorage.setItem('users', JSON.stringify(users));
+                    location.reload();
+                } else {
+                    alert('Invalid input. Username or password not updated.');
+                }
+            } else {
+                alert('User not found.');
+            }
+        }
+
+        function deleteUser(index) {
+            users.splice(index, 1);
+            localStorage.setItem('users', JSON.stringify(users));
+            location.reload();
+        }
+
+        function goToIndex() {
+            window.location.href = 'index.html';
+        }
+
+        function updateActions() {
+            const rows = document.querySelectorAll("#userList tr");
+
+            rows.forEach((row, index) => {
+                const actionsCell = row.querySelector("td:last-child");
+                actionsCell.innerHTML = `
+                    <button onclick="updateUser(${index})">Update User</button>
+                    <button onclick="deleteUser(${index})">Delete User</button>
+                `;
+            });
+        }
+
+        function updateBottomActions() {
+            const bottomActionsRow = document.createElement('tr');
+            bottomActionsRow.innerHTML = `
+                <td colspan="4">
+                    <button onclick="addUser()">Add User</button>
+                    <button onclick="goToIndex()">Go to Index</button>
+                </td>
+            `;
+            userList.appendChild(bottomActionsRow);
+        }
+
+        updateActions();
+        updateBottomActions();
+    </script>
+</body>
+
+</html>
